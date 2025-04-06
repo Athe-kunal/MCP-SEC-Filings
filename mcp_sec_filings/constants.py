@@ -1,4 +1,4 @@
-from typing import Final, TypeAlias
+from typing import Final
 from typing_extensions import Literal
 
 SEC_SEARCH_URL: Final[str] = "http://www.sec.gov/cgi-bin/browse-edgar"

@@ -26,7 +26,7 @@ class SECFilingsRequest(pydantic.BaseModel):
 def validate_date(date_str: str) -> str:
     try:
         datetime.datetime.strptime(date_str,"%Y-%m-%d")
-    except:
+    except ValueError as e:
         raise ValueError(f"The date format YYYY-MM-DD failed for {date_str=}")
     return date_str
 
