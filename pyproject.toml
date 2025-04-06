@@ -14,6 +14,8 @@ requests = "^2.32.3"
 loguru = "^0.7.3"
 pydantic = "^2.11.2"
 pydantic-settings = "^2.8.1"
+black = "^25.1.0"
+httpx = "^0.28.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -22,3 +24,7 @@ ipykernel = "^6.29.5"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+ignore_missing_imports = true
+
