@@ -68,7 +68,7 @@ def get_accession_list(recent_filings: dict[str,list[str]], sec_filings_request:
                 filing_name += str(quarter)
                 if filing_name in sec_form_names:
                     filing_name += "-1"
-            acc_nums_list.append(datamodels.AccessionNumElem(accession_num=acc_num,filing_name=filing_name,filing_date=filing_date,report_date=report_date))
+            acc_nums_list.append(datamodels.AccessionNumElem.from_accession_metadata(accession_num=acc_num,filing_name=filing_name,filing_date=filing_date,report_date=report_date))
             sec_form_names.append(filing_name)
     return acc_nums_list
 

@@ -4,7 +4,7 @@ from typing import Annotated, Any
 import datetime
 
 import re
-
+from loguru import logger
 from mcp_sec_filings import constants
 
 class RequestSettings(pydantic_settings.BaseSettings):
@@ -27,20 +27,27 @@ def validate_date(date_str: str) -> str:
     try:
         datetime.datetime.strptime(date_str,"%Y-%m-%d")
     except ValueError as e:
-        raise ValueError(f"The date format YYYY-MM-DD failed for {date_str=}")
+        logger.error(f"{e} The date format YYYY-MM-DD failed for {date_str=}")
+        raise ValueError from e
     return date_str
 
 class AccessionNumElem(pydantic.BaseModel):
     accession_num: str
-    no_dashes_accession_num: str | None = None
+    no_dashes_accession_num: str 
     filing_name: str
     filing_date: Annotated[str,"Filing Date",pydantic.AfterValidator(validate_date)]
     report_date: Annotated[str,"Report Date",pydantic.AfterValidator(validate_date)]
-    no_dashes_report_date: str | None = None
+    no_dashes_report_date: str 
 
-    def model_post_init(self, __context: Any) -> None:
-        self.no_dashes_accession_num = re.sub("-", "", self.accession_num)
-        self.no_dashes_report_date = "".join(self.report_date.split("-"))
+    @classmethod
+    def from_accession_metadata(cls, accession_num: str, filing_name: str, filing_date: str, report_date: str) -> "AccessionNumElem":
+        no_dashes_accession_num = re.sub("-", "", accession_num)
+        no_dashes_report_date = "".join(report_date.split("-"))
+        return cls(accession_num=accession_num,
+                no_dashes_accession_num=no_dashes_accession_num,
+                no_dashes_report_date=no_dashes_report_date,
+                filing_name=filing_name,
+                filing_date=filing_date,report_date=report_date)
 
 class HTMLURLList(pydantic.BaseModel):
     rgld_cik: int
