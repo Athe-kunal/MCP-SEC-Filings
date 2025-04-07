@@ -1,7 +1,7 @@
 from typing import Annotated
 import httpx
 from mcp.server.fastmcp import FastMCP
-from mcp_sec_filings import constants, datamodels
+from mcp_sec_filings import constants
 
 mcp = FastMCP("sec_filings")
 
