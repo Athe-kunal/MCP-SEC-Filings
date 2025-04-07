@@ -92,14 +92,16 @@ def get_accession_list(
             sec_form_names.append(filing_name)
     return acc_nums_list
 
-
-async def sec_save_pdfs(
-    sec_filings_request: datamodels.SECFilingsRequest,
-) -> tuple[list[datamodels.HTMLURLList], str] | None:
+def _make_ticker_year_path(sec_filings_request: datamodels.SECFilingsRequest) -> str:
     ticker_year_path = os.path.join(
         constants.BASE_DIR, f"{sec_filings_request.ticker}-{sec_filings_request.year}"
     )
     os.makedirs(ticker_year_path, exist_ok=True)
+    return ticker_year_path
+
+async def get_sec_filings_html_urls(
+    sec_filings_request: datamodels.SECFilingsRequest,
+) -> list[datamodels.HTMLURLList] | None:
     cik, recent_filings = await get_metadata_from_ticker(sec_filings_request)
     if not recent_filings:
         logger.error(f"Could not retrieve for {sec_filings_request.model_dump()}")
@@ -113,14 +115,19 @@ async def sec_save_pdfs(
         )
         for acc_num in acc_nums_list
     ]
-    _convert_html_to_pdfs(html_urls, ticker_year_path)
+    return html_urls
 
-    return html_urls, os.path.abspath(ticker_year_path)
+def sec_save_pdf(html_urls: list[datamodels.HTMLURLList], sec_filings_request: datamodels.SECFilingsRequest) -> list[datamodels.MCPResults]:
+    ticker_year_path = _make_ticker_year_path(sec_filings_request=sec_filings_request)
+    mcp_results = _convert_html_to_pdfs(html_urls, ticker_year_path)
+    return mcp_results
 
 
 def _convert_html_to_pdfs(
     html_urls: list[datamodels.HTMLURLList], base_path: str
-) -> None:
+) -> list[datamodels.MCPResults]:
+    
+    mcp_results: list[datamodels.MCPResults] = []
     for html_url in html_urls:
         pdf_path = html_url.html_url.split("/")[-1]
         pdf_path = pdf_path.replace(".htm", f"-{html_url.filing_name}.pdf")
@@ -128,3 +135,10 @@ def _convert_html_to_pdfs(
         pdf_path = os.path.join(base_path, pdf_path)
         pdfkit.from_url(html_url.html_url, pdf_path)
         logger.info(f"Saved filing {html_url.filing_name} at {pdf_path=}")
+        mcp_results.append(datamodels.MCPResults(
+            rgld_cik=html_url.rgld_cik,
+            html_url=html_url.html_url,
+            filing_name=html_url.filing_name,
+            pdf_path=os.path.abspath(pdf_path)
+        ))
+    return mcp_results

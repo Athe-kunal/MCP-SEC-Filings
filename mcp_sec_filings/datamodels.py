@@ -76,3 +76,7 @@ class HTMLURLList(pydantic.BaseModel):
         html_url = f"{constants.SEC_EDGAR_URL}/{rgld_cik}/{acc_num.no_dashes_accession_num}/{ticker.lower()}-{acc_num.no_dashes_report_date}.htm"
         filing_name = acc_num.filing_name
         return cls(rgld_cik=rgld_cik, html_url=html_url, filing_name=filing_name)
+
+
+class MCPResults(HTMLURLList):
+    pdf_path: str
