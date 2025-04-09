@@ -64,7 +64,6 @@ class AccessionNumElem(pydantic.BaseModel):
 
 
 class HTMLURLList(pydantic.BaseModel):
-    rgld_cik: int
     html_url: str
     filing_name: str
 
@@ -75,8 +74,10 @@ class HTMLURLList(pydantic.BaseModel):
         rgld_cik = int(cik.lstrip("0"))
         html_url = f"{constants.SEC_EDGAR_URL}/{rgld_cik}/{acc_num.no_dashes_accession_num}/{ticker.lower()}-{acc_num.no_dashes_report_date}.htm"
         filing_name = acc_num.filing_name
-        return cls(rgld_cik=rgld_cik, html_url=html_url, filing_name=filing_name)
+        return cls(html_url=html_url, filing_name=filing_name)
 
 
-class MCPResults(HTMLURLList):
+class MCPResultsPDF(HTMLURLList):
     pdf_path: str
+    ticker: str
+    

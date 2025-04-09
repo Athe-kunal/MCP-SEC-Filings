@@ -124,15 +124,15 @@ async def get_sec_filings_html_urls(
 def sec_save_pdf(
     html_urls: list[datamodels.HTMLURLList],
     sec_filings_request: datamodels.SECFilingsRequest,
-) -> list[datamodels.MCPResults]:
+) -> list[datamodels.MCPResultsPDF]:
     ticker_year_path = make_ticker_year_path(sec_filings_request=sec_filings_request)
-    mcp_results = convert_html_to_pdfs(html_urls, ticker_year_path)
+    mcp_results = convert_html_to_pdfs(html_urls, ticker_year_path, sec_filings_request.ticker)
     return mcp_results
 
 
 def _convert_single_html_to_pdf(
-    html_url: datamodels.HTMLURLList, base_path: str
-) -> datamodels.MCPResults:
+    html_url: datamodels.HTMLURLList, base_path: str, ticker: str
+) -> datamodels.MCPResultsPDF:
     pdf_path = html_url.html_url.split("/")[-1]
     pdf_path = pdf_path.replace(".htm", f"-{html_url.filing_name}.pdf")
     pdf_path = pdf_path.replace("/A", "A")
@@ -141,8 +141,8 @@ def _convert_single_html_to_pdf(
     pdfkit.from_url(html_url.html_url, pdf_path)
     logger.info(f"Saved filing {html_url.filing_name} at {pdf_path=}")
 
-    return datamodels.MCPResults(
-        rgld_cik=html_url.rgld_cik,
+    return datamodels.MCPResultsPDF(
+        ticker=ticker,
         html_url=html_url.html_url,
         filing_name=html_url.filing_name,
         pdf_path=os.path.abspath(pdf_path),
@@ -150,14 +150,14 @@ def _convert_single_html_to_pdf(
 
 
 def convert_html_to_pdfs(
-    html_urls: list[datamodels.HTMLURLList], base_path: str
-) -> list[datamodels.MCPResults]:
+    html_urls: list[datamodels.HTMLURLList], base_path: str, ticker: str
+) -> list[datamodels.MCPResultsPDF]:
 
-    mcp_results: list[datamodels.MCPResults] = []
+    mcp_results: list[datamodels.MCPResultsPDF] = []
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
         futures = [
-            executor.submit(_convert_single_html_to_pdf, html_url, base_path)
+            executor.submit(_convert_single_html_to_pdf, html_url, base_path, ticker)
             for html_url in html_urls
         ]
         for future in futures:
