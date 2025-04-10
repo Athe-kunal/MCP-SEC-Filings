@@ -1,6 +1,10 @@
+import os
 from typing import Annotated
 import asyncio
 from loguru import logger
+import pathlib
+import json
+import pydantic
 from mcp import types
 from mcp.server.fastmcp import FastMCP
 
@@ -73,8 +77,8 @@ async def get_sec_filings_save_pdf(
     ), f"Both year and year range can't be set, only one of them can be set but got {year=} and {year_range=}"
     
     sec_filings_request_list = get_sec_filings_request(year=year, year_range=year_range, ticker=ticker,filing_types=filing_types,include_amends=include_amends)
-
-    semaphore = asyncio.Semaphore(5)
+    max_concurrency = int(os.getenv("MAX_CONCURRENCY","5"))
+    semaphore = asyncio.Semaphore(max_concurrency)
     tasks = [
         process_sec_filings_request(
             sec_filings_request=sec_filings_request, semaphore=semaphore
@@ -94,6 +98,25 @@ async def get_sec_filings_save_pdf(
                 html_urls=html_urls, sec_filings_request=sec_filings_request
             ))
 
-# @mcp.list_resources()
-# async def list_resources() -> list[types.Resource]:
+@mcp.list_resources()
+async def list_resources() -> list[types.Resource]:
+    json_data: dict[str, list[dict[str,str]]] = {}
+    for json_file in pathlib.Path(constants.BASE_DIR).rglob("*.json"):
+        with open(json_file, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                json_data[json_file.stem] = data 
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to decode {json_file}: {e}")
+
+    resources = [types.Resource(
+        uri=pydantic.FileUrl(f"file:///{val['pdf_path']}"),
+        name=f"{val['ticker']: {val['filing_name']}}",
+        description=f"The {val['filing_name']} for the ticker symbol {val['ticker']}",
+        mimeType="application/pdf"
+        ) for _, vals in json_data.items() for val in vals
+    ]
+    return resources
+
+
 

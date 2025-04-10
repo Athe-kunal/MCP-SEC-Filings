@@ -3,8 +3,10 @@ import pandas as pd
 from datetime import datetime
 from typing import Union
 import pdfkit
+import json
 import os
 import httpx
+import asyncio
 from loguru import logger
 import concurrent.futures
 from mcp_sec_filings import constants, datamodels
@@ -150,7 +152,7 @@ def _convert_single_html_to_pdf(
 
 
 def convert_html_to_pdfs(
-    html_urls: list[datamodels.HTMLURLList], base_path: str, ticker: str
+    html_urls: list[datamodels.HTMLURLList], base_path: str, ticker: str, year: int
 ) -> list[datamodels.MCPResultsPDF]:
 
     mcp_results: list[datamodels.MCPResultsPDF] = []
@@ -162,5 +164,16 @@ def convert_html_to_pdfs(
         ]
         for future in futures:
             mcp_results.append(future.result())
-
+    mcp_results_json = [mcp_res.model_dump() for mcp_res in mcp_results]
+    metadata_path = os.path.join(base_path, f"{ticker}-{year}.json")
+    with open(metadata_path, "w", encoding="utf-8") as f:
+        json.dump(mcp_results_json, f, indent=4)
+    logger.info(f"Saved metadata at {metadata_path=}")
     return mcp_results
+
+
+if __name__ == '__main__':
+    sec_filings_request = datamodels.SECFilingsRequest(ticker="AAPL",year=2024,filing_types=["10-K","10-Q"],include_amends=True)
+    html_urls = asyncio.run(get_sec_filings_html_urls(sec_filings_request=sec_filings_request))
+    base_path = make_ticker_year_path(sec_filings_request)
+    mcp_results = convert_html_to_pdfs(html_urls=html_urls,base_path=base_path,ticker=sec_filings_request.ticker,year=sec_filings_request.year)
