@@ -6,7 +6,7 @@ authors = ["Astarag Mohapatra athekunal@gmail.com"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.13,<4.0"
 pandas = "^2.2.3"
 pdfkit = "^1.0.0"
 python-dotenv = "^1.1.0"
@@ -17,10 +17,12 @@ pydantic-settings = "^2.8.1"
 black = "^25.1.0"
 httpx = "^0.28.1"
 mcp = {extras = ["cli"], version = "^1.6.0"}
+pkginfo = "^1.12.1.2"
 
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
+black = "^25.1.0"
 
 [build-system]
 requires = ["poetry-core"]

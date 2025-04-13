@@ -128,7 +128,9 @@ def sec_save_pdf(
     sec_filings_request: datamodels.SECFilingsRequest,
 ) -> list[datamodels.MCPResultsPDF]:
     ticker_year_path = make_ticker_year_path(sec_filings_request=sec_filings_request)
-    mcp_results = convert_html_to_pdfs(html_urls, ticker_year_path, sec_filings_request.ticker)
+    mcp_results = convert_html_to_pdfs(
+        html_urls, ticker_year_path, sec_filings_request.ticker
+    )
     return mcp_results
 
 
@@ -172,8 +174,18 @@ def convert_html_to_pdfs(
     return mcp_results
 
 
-if __name__ == '__main__':
-    sec_filings_request = datamodels.SECFilingsRequest(ticker="AAPL",year=2024,filing_types=["10-K","10-Q"],include_amends=True)
-    html_urls = asyncio.run(get_sec_filings_html_urls(sec_filings_request=sec_filings_request))
+if __name__ == "__main__":
+    sec_filings_request = datamodels.SECFilingsRequest(
+        ticker="AAPL", year=2024, filing_types=["10-K", "10-Q"], include_amends=True
+    )
+    html_urls = asyncio.run(
+        get_sec_filings_html_urls(sec_filings_request=sec_filings_request)
+    )
     base_path = make_ticker_year_path(sec_filings_request)
-    mcp_results = convert_html_to_pdfs(html_urls=html_urls,base_path=base_path,ticker=sec_filings_request.ticker,year=sec_filings_request.year)
+    if html_urls:
+        mcp_results = convert_html_to_pdfs(
+            html_urls=html_urls,
+            base_path=base_path,
+            ticker=sec_filings_request.ticker,
+            year=sec_filings_request.year,
+        )

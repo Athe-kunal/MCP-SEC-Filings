@@ -80,4 +80,3 @@ class HTMLURLList(pydantic.BaseModel):
 class MCPResultsPDF(HTMLURLList):
     pdf_path: str
     ticker: str
-    
