@@ -176,7 +176,7 @@ def convert_html_to_pdfs(
 
 if __name__ == "__main__":
     sec_filings_request = datamodels.SECFilingsRequest(
-        ticker="AAPL", year=2024, filing_types=["10-K", "10-Q"], include_amends=True
+        ticker="GOOG", year=2023, filing_types=["10-K", "10-Q"], include_amends=True
     )
     html_urls = asyncio.run(
         get_sec_filings_html_urls(sec_filings_request=sec_filings_request)

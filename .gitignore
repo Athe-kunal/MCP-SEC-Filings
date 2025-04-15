@@ -1,2 +1,4 @@
 SEC_EDGAR_FILINGS
 .vscode
+__pycache__
+mcp_sec_filings/__pycache__
