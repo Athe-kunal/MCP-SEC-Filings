@@ -137,7 +137,7 @@ def sec_save_pdf(
     return mcp_results
 
 
-def _convert_single_html_to_pdf(
+def convert_single_html_to_pdf(
     html_url: datamodels.HTMLURLList, base_path: str, ticker: str
 ) -> datamodels.MCPResultsPDF:
     pdf_path = html_url.html_url.split("/")[-1]
@@ -164,7 +164,7 @@ def convert_html_to_pdfs(
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
         futures = [
-            executor.submit(_convert_single_html_to_pdf, html_url, base_path, ticker)
+            executor.submit(convert_single_html_to_pdf, html_url, base_path, ticker)
             for html_url in html_urls
         ]
         for future in futures:

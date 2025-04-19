@@ -67,3 +67,10 @@ SecFilingType = Literal[
     "N-Q/A",  # Mutual fund quarterly reports + Amended
     "POS AM",  # Post-effective amendment to registration statement
 ]
+
+DOCLING_MODEL_NAME = "ds4sd/SmolDocling-256M-preview"
+PROMPT_TEXT = "Convert page to Docling."
+CHAT_TEMPLATE = f"<|im_start|>User:<image>{PROMPT_TEXT}<end_of_utterance>\
+Assistant:"
+MAX_TOKENS= 8192
+PAGE_BREAK = "---Page Break---"
